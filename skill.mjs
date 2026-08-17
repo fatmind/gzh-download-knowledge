@@ -16,8 +16,11 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+const SKILL_HOME = dirname(fileURLToPath(import.meta.url));
+const RUNS_DIR = join(SKILL_HOME, 'runs');
 
 const RELAY_URL = 'http://127.0.0.1:3459';
 const TMP = join(tmpdir(), 'gzh-download-knowledge-' + process.pid);
@@ -320,7 +323,7 @@ async function main() {
   const exportDir = resolve(input.outputDir || 'gzh-export');
   mkdirSync(exportDir, { recursive: true });
 
-  const pipelineOutDir = resolve(input.output_dir || process.cwd());
+  const pipelineOutDir = resolve(input.output_dir || RUNS_DIR);
   const outputFiles = input.output_files || {};
   const resultFile = join(pipelineOutDir, outputFiles.result || 'res.json');
   const dataFile = join(pipelineOutDir, outputFiles.data || 'data.md');

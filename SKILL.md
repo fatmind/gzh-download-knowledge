@@ -1,5 +1,10 @@
 ---
 name: gzh-download-knowledge
+slug: gzh-download-knowledge
+displayName: 公众号文章导出 MD 知识库
+version: 1.0.0
+summary: 把自己的公众号历史文章批量导出为本地 Markdown——后台官方「发表记录」全量列表、稳定链接、一键批量保存、纯本地运行、零 token 成本。由 webclaw3 驱动（复用你已登录的 Chrome，无需填任何 token/cookie）。
+license: MIT
 description: 把自己的公众号历史文章批量导出为本地 Markdown 归档——后台官方「发表记录」全量列表、稳定链接、一键批量保存、纯本地运行、零 token 成本。由 webclaw3 驱动（复用你已登录的 Chrome，无需填任何 token/cookie）。触发场景：想把公众号历史文章批量存到本地做归档/知识库（只支持自己的公众号，后台登录的那个号）。
 ---
 
@@ -34,7 +39,7 @@ node skill.mjs <input.json>
 | `offset` | int | 否 | `0` | 跳过前 N 篇再取——增量归档：第一次 0，第二次 10，依此类推 |
 | `outputDir` | string | 否 | `./gzh-export/` | 导出目录（articles/*.md + index.json 写这里） |
 | `homeUrl` | string | 否 | 自动 | 带 token 的公众号后台 URL（浏览器地址栏复制）。不填时自动从已打开的后台 tab 提取 token |
-| `output_dir` | string | 否 | `process.cwd()` | 管线输出目录（res.json + data.md 写这里） |
+| `output_dir` | string | 否 | `<skill 目录>/runs/`（即 `~/xhs_skill/product/gzh-download-knowledge/runs/`） | 管线输出目录（res.json + data.md 写这里；每次运行的存档都留在 runs/） |
 | `output_files` | object | 否 | — | `{ result, data }` 自定义 res.json / data.md 文件名 |
 
 > 会话 token 说明：微信后台必须带 token 访问（无 token 会"请重新登录"）。运行前先在浏览器打开 mp.weixin.qq.com 公众号后台并保持登录（URL 带 token）——脚本会自动从已打开的后台 tab 提取；也可用 `homeUrl` 直接指定。
