@@ -7,7 +7,7 @@
  *   全部走 Extension Relay HTTP API（:3459），不使用 CDP。
  *
  * 关键决策注释：
- * 1. 全程串行单 tab：微信系（mp.weixin.qq.com）无授权请求严格频控，并发开多 tab 会触发风控；
+ * 1. 全程串行单 tab：微信系（mp.weixin.qq.com）无授权请求对访问频率有严格限制，并发开多 tab 会触发访问限制；
  *    每条间隔 ≥2.5s，翻页/开 tab 后 sleep 6s 等加载。
  * 2. 只做自己的公众号：后台「发表记录」是官方全量历史列表（按发布日期倒序），账号由登录态决定，
  *    无需传 account；offset 直接映射到发表记录分页参数 begin（增量归档）。
@@ -25,9 +25,9 @@ const RUNS_DIR = join(SKILL_HOME, 'runs');
 const RELAY_URL = 'http://127.0.0.1:3459';
 const TMP = join(tmpdir(), 'gzh-download-knowledge-' + process.pid);
 
-// ---------- 时序常量（微信系频控） ----------
+// ---------- 时序常量（微信系访问节奏） ----------
 const SLEEP_OPEN_MS = 6000;    // 开 tab / 翻页后等页面加载（微信页面慢）
-const SLEEP_ITEM_MS = 2500;    // 条与条之间间隔，防频控
+const SLEEP_ITEM_MS = 2500;    // 条与条之间间隔，控制访问节奏
 const PAGE_SIZE = 10;          // 发表记录每页 10 条
 const MAX_PAGES = 10;          // 翻页封顶
 const RETRY_ATTEMPTS = 3;      // 扩展瞬时断开重试次数
@@ -243,7 +243,7 @@ async function runOwn(input) {
     };
   }
 
-  // 2. 逐页抓发表记录 → 逐条开短码链接提取正文（串行，防频控）
+  // 2. 逐页抓发表记录 → 逐条开短码链接提取正文（串行，控制访问节奏）
   //    offset 直接映射到发表记录分页参数 begin（列表按发布日期倒序，跳过前 offset 篇即增量归档）
   let begin = offset;
   for (let page = 0; page < MAX_PAGES; page++) {
@@ -320,10 +320,10 @@ async function main() {
 
   const count = Number.isFinite(Number(input.count)) ? Math.max(1, Number(input.count)) : 10;
   const offset = Number.isFinite(Number(input.offset)) ? Math.max(0, Number(input.offset)) : 0;
-  const exportDir = resolve(input.outputDir || 'gzh-export');
+  const exportDir = resolve(input.outputDir || '/tmp/gzh-download-knowledge-output');
   mkdirSync(exportDir, { recursive: true });
 
-  const pipelineOutDir = resolve(input.output_dir || RUNS_DIR);
+  const pipelineOutDir = resolve(input.output_dir || '/tmp/gzh-download-knowledge-output');
   const outputFiles = input.output_files || {};
   const resultFile = join(pipelineOutDir, outputFiles.result || 'res.json');
   const dataFile = join(pipelineOutDir, outputFiles.data || 'data.md');

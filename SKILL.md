@@ -2,7 +2,7 @@
 name: gzh-download-knowledge
 slug: gzh-download-knowledge
 displayName: 公众号文章导出 MD 知识库
-version: 1.0.0
+version: 1.0.2
 summary: 把自己的公众号历史文章批量导出为本地 Markdown——后台官方「发表记录」全量列表、稳定链接、一键批量保存、纯本地运行、零 token 成本。由 webclaw3 驱动（复用你已登录的 Chrome，无需填任何 token/cookie）。
 license: MIT
 description: 把自己的公众号历史文章批量导出为本地 Markdown 归档——后台官方「发表记录」全量列表、稳定链接、一键批量保存、纯本地运行、零 token 成本。由 webclaw3 驱动（复用你已登录的 Chrome，无需填任何 token/cookie）。触发场景：想把公众号历史文章批量存到本地做归档/知识库（只支持自己的公众号，后台登录的那个号）。
@@ -37,9 +37,9 @@ node skill.mjs <input.json>
 |---|---|---|---|---|
 | `count` | int | 否 | `10` | 本次要新增保存的篇数（去重跳过的旧文不计入，自动继续向后抓取补满） |
 | `offset` | int | 否 | `0` | 跳过前 N 篇再取——增量归档：第一次 0，第二次 10，依此类推 |
-| `outputDir` | string | 否 | `./gzh-export/` | 导出目录（articles/*.md + index.json 写这里） |
+| `outputDir` | string | 否 | `/tmp/gzh-download-knowledge-output/` | 导出目录（articles/*.md + index.json 写这里） |
 | `homeUrl` | string | 否 | 自动 | 带 token 的公众号后台 URL（浏览器地址栏复制）。不填时自动从已打开的后台 tab 提取 token |
-| `output_dir` | string | 否 | `<skill 目录>/runs/`（即 `~/xhs_skill/product/gzh-download-knowledge/runs/`） | 管线输出目录（res.json + data.md 写这里；每次运行的存档都留在 runs/） |
+| `output_dir` | string | 否 | `/tmp/gzh-download-knowledge-output/` | 管线输出目录（res.json + data.md 写这里；与导出目录同默认，也可分开指定） |
 | `output_files` | object | 否 | — | `{ result, data }` 自定义 res.json / data.md 文件名 |
 
 > 会话 token 说明：微信后台必须带 token 访问（无 token 会"请重新登录"）。运行前先在浏览器打开 mp.weixin.qq.com 公众号后台并保持登录（URL 带 token）——脚本会自动从已打开的后台 tab 提取；也可用 `homeUrl` 直接指定。
@@ -60,7 +60,7 @@ stdout 只输出一行 JSON：`{ status, summary, output_dir }`。
 - **只取「已发表」文章**：发表记录列表项即已发表文章（已删除条目是签名式 URL，不匹配短码选择器，天然跳过）。
 - **顺序与增量**：发表记录按发布日期倒序（最新在前）；`offset` 映射到发表记录分页参数 begin——跳过前 offset 篇，`count` 取本次篇数，配合去重可分段归档完整个号。
 - **去重**：稳定短码 `mp.weixin.qq.com/s/<短码>` 作 key；跨次运行自动扫描 `outputDir` 已有产物（articles/*.md 的 frontmatter url 与 index.json），已存在的 SKIP。**去重跳过不计入 count，自动继续向后抓取直到本次新增 count 篇**（归档时重跑会自动补全缺口，无需手动算 offset）。
-- **频控**：全程串行单 tab、条间 ≥2.5s、翻页/开 tab 后 sleep 6s 等加载；连续 3 篇失败立即停，不硬刚。
+- **访问节奏**：全程串行单 tab、条间 ≥2.5s、翻页/开 tab 后 sleep 6s 等加载；连续 3 篇失败立即停，不硬刚。
 - 不足 `count` 时 `index.json` 标 `partial` 并给出原因（发表记录不足 / 页面加载失败 / 已删除文章）。
 
 ## 报错排查
